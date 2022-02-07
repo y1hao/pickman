@@ -14,7 +14,7 @@ class Input {
         if (this._position >= this._source.length) {
             throw new Error("Cannot read the current character because input has reached the end.");
         }
-        return this._source[this._position];
+        return this._source.substring(this._position);
     }
 
     public get isAtEnd() {
@@ -26,8 +26,8 @@ class Input {
         this._position = position;
     }
 
-    advance() {
-        return new Input(this._source, this._position + 1);
+    advance(n: number) {
+        return new Input(this._source, this._position + n);
     }
 }
 

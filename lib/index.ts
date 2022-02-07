@@ -1,5 +1,5 @@
 import Parser from "./ParserBuilder";
-import Char from "./Char";
+import { AnyChar, Letter, Digit, Alnum, Space, Char, Not } from "./Char";
 
 export default Parser;
-export { Char }
+export { AnyChar, Letter, Digit, Alnum, Space, Char, Not };

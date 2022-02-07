@@ -1,5 +1,5 @@
 import Input from "./Input";
-import { IParser, ParsersOf } from "./Parser";
+import { IParser} from "./Parser";
 import Result, { isSuccessful } from "./Result";
 
 interface IParserBuilder<TResult, TArgs extends any[]> {
@@ -10,14 +10,14 @@ interface IParserBuilder<TResult, TArgs extends any[]> {
 }
 
 class ParserBuilder<TResult, TArgs extends any[]> implements IParserBuilder<TResult, TArgs> {
-    private children: ParsersOf<TArgs>;
+    private children: IParser<any>[];
     
-    constructor(children: ParsersOf<TArgs>) {
+    constructor(children: IParser<any>[]) {
         this.children = children;
     }
 
     with<T>(parser: IParser<T>): IParserBuilder<TResult, [...TArgs, T]> {
-        return new ParserBuilder([...this.children, parser] as ParsersOf<[...TArgs, T]>);
+        return new ParserBuilder([...this.children, parser]);
     }
     
     withMany<T>(parser: IParser<T>): IParserBuilder<TResult, [...TArgs, T[]]> {
@@ -30,7 +30,7 @@ class ParserBuilder<TResult, TArgs extends any[]> implements IParserBuilder<TRes
                 let remainder = input;
                 let parsed = true;
                 while (parsed) {
-                    const result = parser._parseInternal.call(this, remainder);
+                    const result = parser._parseInternal(remainder);
                     parsed = result.isSuccessful;
                     remainder = result.remainder;
                     if (isSuccessful(result)) {
@@ -44,7 +44,7 @@ class ParserBuilder<TResult, TArgs extends any[]> implements IParserBuilder<TRes
                 }
             }
         }
-        return new ParserBuilder([...this.children, manyParser] as ParsersOf<[...TArgs, T[]]>);
+        return new ParserBuilder([...this.children, manyParser]);
     }
 
     withOptional<T>(parser: IParser<T>): IParserBuilder<TResult, [...TArgs, T | undefined]> {
@@ -53,7 +53,7 @@ class ParserBuilder<TResult, TArgs extends any[]> implements IParserBuilder<TRes
                 return parser.parse.call(this, input);
             },
             _parseInternal(input: Input): Result<T | undefined> {
-                const result = parser._parseInternal.call(this, input);
+                const result = parser._parseInternal(input);
                 if (isSuccessful(result)) {
                     return result;
                 }
@@ -64,7 +64,7 @@ class ParserBuilder<TResult, TArgs extends any[]> implements IParserBuilder<TRes
                 }
             }
         }
-        return new ParserBuilder([...this.children, optionalParser] as ParsersOf<[...TArgs, T | undefined]>);
+        return new ParserBuilder([...this.children, optionalParser]);
     }
 
     collect(collectFunc: (...args: TArgs) => TResult): IParser<TResult> {
